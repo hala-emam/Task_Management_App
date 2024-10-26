@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { v4 as uuid4 } from 'uuid';
 import { addTask } from "../features/taskSlice";
@@ -20,6 +20,8 @@ function AddTask() {
   const [status, setStatus] = useState('todo');
   const [priority, setPriority] = useState('Medium'); 
   const [image, setImage] = useState(null);
+  const fileInputRef = useRef(null); // Create a ref for the file input
+
   const dispatch = useDispatch();
 
   const handleSubmit = (e) => {
@@ -37,47 +39,52 @@ function AddTask() {
           image,
         };
         dispatch(addTask(newTask));
+
+        // Reset form fields
         setTitle('');
         setDescription('');
         setStatus('todo');
-        setPriority('Medium'); 
+        setPriority('Medium');
         setImage(null);
+
+        // Clear the file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ''; 
+        }
       })
       .catch((err) => {
         alert(err.message);
       });
   };
 
- 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
 
     const reader = new FileReader();
     reader.onloadend = () => {
-        setImage(reader.result); // Set the Base64 string as the image state
+      setImage(reader.result); // Set the Base64 string as the image state
     };
     if (file) {
-        reader.readAsDataURL(file); // Convert the file to Base64 string
+      reader.readAsDataURL(file); // Convert the file to Base64 string
     }
-};  
+  };
 
   return (
     <form className='mb-6' onSubmit={handleSubmit}>
       <h2 className='text-xl mb-3 font-semibold text-gray-800'>Add New Task</h2>
-      
-      
+
       <div className='mb-4'>
-        <input 
+        <input
           type="file"
           accept="image/*"
           onChange={handleImageChange}
+          ref={fileInputRef} // Attach the ref to the file input
           className='w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2'
         />
       </div>
 
-      
       <div className='mb-4'>
-        <input 
+        <input
           type="text"
           placeholder='Task Title'
           value={title}
@@ -86,9 +93,8 @@ function AddTask() {
         />
       </div>
 
-      
       <div className='mb-4'>
-        <textarea 
+        <textarea
           placeholder='Description'
           className='w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2'
           rows='3'
@@ -97,9 +103,8 @@ function AddTask() {
         />
       </div>
 
-      
       <div className='mb-4'>
-        <select 
+        <select
           value={priority}
           onChange={(e) => setPriority(e.target.value)}
           className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
@@ -110,9 +115,8 @@ function AddTask() {
         </select>
       </div>
 
-      
       <div className='mb-4'>
-        <select 
+        <select
           value={status}
           onChange={(e) => setStatus(e.target.value)}
           className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2"
@@ -123,7 +127,6 @@ function AddTask() {
         </select>
       </div>
 
-      
       <button type="submit" className="w-full bg-indigo-600 text-white py-2 rounded-md hover:bg-indigo-700">
         Add Task
       </button>
